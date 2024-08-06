@@ -1,0 +1,16 @@
+---
+# defaults file for nginx
+
+good_groups: "{{ allow_list }}"
+
+
+contents:
+  - header_id: 1
+    content: lorem ipsum dolor sit amet
+  - header_id: 1
+    content: consectetur adipiscing elit
+  - header_id: 2
+    content: Nachts ist es kälter als draußen
+  - header_id: 3
+    content: rinderkennzeichnungsfleischetikettierungsüberwachungsaufgabenübertragungsgesetz
+

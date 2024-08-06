@@ -1,0 +1,10 @@
+- name: Run the take home test
+  hosts: all
+  gather_facts: false
+  become: yes
+  vars:
+    roles_path: "/Users/vishalbattu/Downloads/figment-protops-take-at-home-test-main/roles/nginx"
+
+  roles:
+    - nginx
+    - system

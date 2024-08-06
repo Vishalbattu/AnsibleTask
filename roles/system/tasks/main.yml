@@ -1,0 +1,51 @@
+---
+# tasks file for system
+
+# Install UFW (Uncomplicated Firewall) package
+- name: Install UFW
+  apt:
+    name: ufw
+    state: present
+
+# Allow incoming SSH traffic on port 22
+- name: Allow OpenSSH
+  ufw:
+    rule: allow
+    port: '22'
+
+# Allow incoming HTTP traffic on port 80
+- name: Allow HTTP
+  ufw:
+    rule: allow
+    port: '80'
+
+# Allow incoming HTTPS traffic on port 443
+- name: Allow HTTPS
+  ufw:
+    rule: allow
+    port: '443'
+
+# Deny all other incoming traffic
+- name: Deny all other ports
+  ufw:
+    rule: deny
+    from: any
+    to: any
+
+# Enable UFW to start protecting the system
+- name: Enable UFW
+  ufw:
+    state: enabled
+
+# Set the value of vm.swappiness to 10
+- name: Set vm.swappiness to 10
+  sysctl:
+    name: vm.swappiness
+    value: '10'
+    state: present
+
+# Install the htop package for system monitoring
+- name: Install htop
+  apt:
+    name: htop
+    state: present

@@ -1,0 +1,72 @@
+- name: Create nginx-www user
+  # Added a task to create a user 'nginx-www' for running NGINX service
+  ansible.builtin.user:
+    name: nginx-www
+    state: present
+    shell: /bin/bash
+    home: /home/nginx-www
+    create_home: yes
+  become: yes
+
+- name: Install dependencies
+  # Removed loop as there's only one package to install. If we want to use install multiple then we use loop
+  apt:
+    name: nginx
+    state: present
+  notify: Restart nginx service
+  become: yes
+
+- name: Install nginx systemd service
+  # Modified to install the NGINX systemd service file from a template.
+  # Changed permission to 0644 for security reasons. This restricts write access to the owner
+  # while allowing read access for others, adhering to best practices.
+  template:
+    src: "{{ roles_path }}/templates/nginx.service.j2"
+    dest: /etc/systemd/system/nginx.service
+    owner: nginx-www
+    group: nginx-www
+    mode: 0644
+  become: yes
+
+- name: Setup nginx datadir
+  # Updated to ensure proper permissions for the NGINX data directory.
+  # Changed mode from "0600" to "0755" to allow read and execute permissions for others enabling NGINX to serve web content properly.
+  file:
+    state: directory
+    path: "/var/www/html"
+    owner: nginx-www
+    group: nginx-www
+    mode: "0755"
+  become: yes
+
+- name: Create an html page from the breakfix html template
+  # Changed to create the NGINX default HTML page from a template.
+  # Modified the destination file to adhere to standard naming conventions and specify a more appropriate location
+  # Added variables to provide dynamic content generation based on 'contents' and 'good_groups'.
+  template:
+    src: breakfix.html.j2
+    dest: /var/www/html/index.html   # Changed destination to '/var/www/html/index.html'
+    owner: nginx-www
+    group: nginx-www
+    mode: 0644 # Reduced file permissions for enhanced security
+  vars:
+    headers_list: "{{ contents | map(attribute='header_id') | unique }}"  # Creates a list of unique header IDs from 'contents'
+    allowed_list: "{{ good_groups | default([]) }}"  # Use good_groups or default to an empty list
+  become: yes
+
+- name: Ensure NGINX service is enabled and running
+  # Ensures that NGINX service is enabled and started.
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Check NGINX status
+  # Task to check NGINX service status.
+  # Changes service name to nginx from apche3
+  ansible.builtin.systemd:
+    name: nginx 
+    state: restarted
+  register: nginx_status
+  become: yes
